@@ -63,7 +63,6 @@ private:
     uint8_t brightness;
 
     int screen[3][8];
-    int screen_internal[3][2][4];
 };
 
 #endif

@@ -59,7 +59,7 @@ void P20F04D::setScreenNoLatch(int new_screen[3][8]) {
         for (uint8_t i=0; i<8; i++) {
             screen[c][i] = new_screen[c][i];
         }
-        P20F04D::recalc(c);
+        //P20F04D::recalc(c);
     }
     P20F04D::redrawNoLatch();
 }
@@ -70,37 +70,14 @@ void P20F04D::appendCol(uint8_t col[3]) {
             screen[c][r] = screen[c][r] << 1;
             screen[c][r] = screen[c][r] | ((col[c] >> r) & 0x01);
         }
-        P20F04D::recalc(c);
+        //P20F04D::recalc(c);
     }
     P20F04D::redraw();
 }
 
-void P20F04D::recalc(uint8_t c) {
-    for (uint8_t i=0; i<2; i++) {
-        for (uint8_t j=0; j<4; j++) {
-            screen_internal[c][i][j]=0;
-        }
-        screen_internal[c][i][0] |= (screen[c][3+4*i] & 0x000F);
-        screen_internal[c][i][0] |= (screen[c][2+4*i] & 0x000F) << 4;
-        screen_internal[c][i][0] |= (screen[c][1+4*i] & 0x000F) << 8;
-        screen_internal[c][i][0] |= (screen[c][0+4*i] & 0x000F) << 12;
-
-        screen_internal[c][i][1] |= (screen[c][3+4*i] & 0x00F0) >> 4;
-        screen_internal[c][i][1] |= (screen[c][2+4*i] & 0x00F0);
-        screen_internal[c][i][1] |= (screen[c][1+4*i] & 0x00F0) << 4;
-        screen_internal[c][i][1] |= (screen[c][0+4*i] & 0x00F0) << 8;
-
-        screen_internal[c][i][2] |= (screen[c][3+4*i] & 0x0F00) >> 8;
-        screen_internal[c][i][2] |= (screen[c][2+4*i] & 0x0F00) >> 4;
-        screen_internal[c][i][2] |= (screen[c][1+4*i] & 0x0F00);
-        screen_internal[c][i][2] |= (screen[c][0+4*i] & 0x0F00) << 4;
-
-        screen_internal[c][i][3] |= (screen[c][3+4*i] & 0xF000) >> 12;
-        screen_internal[c][i][3] |= (screen[c][2+4*i] & 0xF000) >> 8;
-        screen_internal[c][i][3] |= (screen[c][1+4*i] & 0xF000) >> 4;
-        screen_internal[c][i][3] |= (screen[c][0+4*i] & 0xF000);
-    }
-}
+/*void P20F04D::recalc(uint8_t c) {
+    
+}*/
 
 void P20F04D::redraw() {
     digitalWrite(latchpin, 0);
@@ -108,6 +85,33 @@ void P20F04D::redraw() {
     digitalWrite(latchpin, 1);
 }
 void P20F04D::redrawNoLatch() {
+    int screen_internal[3][2][4];
+    for (uint8_t c=0; c<3; c++) {
+        for (uint8_t i=0; i<2; i++) {
+            for (uint8_t j=0; j<4; j++) {
+                screen_internal[c][i][j]=0;
+            }
+            screen_internal[c][i][0] |= (screen[c][3+4*i] & 0x000F);
+            screen_internal[c][i][0] |= (screen[c][2+4*i] & 0x000F) << 4;
+            screen_internal[c][i][0] |= (screen[c][1+4*i] & 0x000F) << 8;
+            screen_internal[c][i][0] |= (screen[c][0+4*i] & 0x000F) << 12;
+
+            screen_internal[c][i][1] |= (screen[c][3+4*i] & 0x00F0) >> 4;
+            screen_internal[c][i][1] |= (screen[c][2+4*i] & 0x00F0);
+            screen_internal[c][i][1] |= (screen[c][1+4*i] & 0x00F0) << 4;
+            screen_internal[c][i][1] |= (screen[c][0+4*i] & 0x00F0) << 8;
+
+            screen_internal[c][i][2] |= (screen[c][3+4*i] & 0x0F00) >> 8;
+            screen_internal[c][i][2] |= (screen[c][2+4*i] & 0x0F00) >> 4;
+            screen_internal[c][i][2] |= (screen[c][1+4*i] & 0x0F00);
+            screen_internal[c][i][2] |= (screen[c][0+4*i] & 0x0F00) << 4;
+
+            screen_internal[c][i][3] |= (screen[c][3+4*i] & 0xF000) >> 12;
+            screen_internal[c][i][3] |= (screen[c][2+4*i] & 0xF000) >> 8;
+            screen_internal[c][i][3] |= (screen[c][1+4*i] & 0xF000) >> 4;
+            screen_internal[c][i][3] |= (screen[c][0+4*i] & 0xF000);
+        }
+    }
     for (int j=3; j>=0; j--) {
         P20F04D::shiftBlock(
             screen_internal[0][0][j],screen_internal[0][1][j],
@@ -281,22 +285,22 @@ void P20F04D::testSwapArray(int d) {
 void P20F04D::testShiftArray(int d) {
     int dataArray[16];
     //Binary notation as comment
-    dataArray[0] = 0xffff; //0b1111111111111111
-    dataArray[1] = 0xfffe; //0b1111111111111110
-    dataArray[2] = 0xfffc; //0b1111111111111100
-    dataArray[3] = 0xfff8; //0b1111111111111000
-    dataArray[4] = 0xfff0; //0b1111111111110000
-    dataArray[5] = 0xffe0; //0b1111111111100000
-    dataArray[6] = 0xffc0; //0b1111111111000000
-    dataArray[7] = 0xff80; //0b1111111110000000
-    dataArray[8] = 0xff00; //0b1111111100000000
-    dataArray[9] = 0xfe00; //0b1111111000000000
-    dataArray[10] = 0xfc00; //0b1111110000000000
-    dataArray[11] = 0xf800; //0b1111100000000000
-    dataArray[12] = 0xf000; //0b1111000000000000
-    dataArray[13] = 0xe000; //0b1110000000000000
-    dataArray[14] = 0xc000; //0b1100000000000000
-    dataArray[15] = 0x8000; //0b1000000000000000
+    dataArray[0] = 0b1111111111111111;
+    dataArray[1] = 0b1111111111111110;
+    dataArray[2] = 0b1111111111111100;
+    dataArray[3] = 0b1111111111111000;
+    dataArray[4] = 0b1111111111110000;
+    dataArray[5] = 0b1111111111100000;
+    dataArray[6] = 0b1111111111000000;
+    dataArray[7] = 0b1111111110000000;
+    dataArray[8] = 0b1111111100000000;
+    dataArray[9] = 0b1111111000000000;
+    dataArray[10] = 0b1111110000000000;
+    dataArray[11] = 0b1111100000000000;
+    dataArray[12] = 0b1111000000000000;
+    dataArray[13] = 0b1110000000000000;
+    dataArray[14] = 0b1100000000000000;
+    dataArray[15] = 0b1000000000000000;
     for (uint8_t j = 0; j < 16; j++) {
         //load the light sequence you want from array
         int data = dataArray[j];
