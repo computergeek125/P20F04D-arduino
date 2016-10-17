@@ -33,11 +33,11 @@ public:
      *  Rows are the second dimension, from top to bottom
      *  Pixels are the bit in the int16 with the MSB on the far left edge
      */
-    void setScreenNoLatch(int new_screen[3][8]);
+    void setScreenNL(int new_screen[3][8]);
+    void appendColNR(uint8_t col[3]);
     void appendCol(uint8_t col[3]);
-    void recalc(uint8_t c);
     void redraw();
-    void redrawNoLatch();
+    void redrawNL();
     void enable();
     void disable();
     uint8_t getBrightness();

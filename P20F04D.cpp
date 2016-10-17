@@ -50,41 +50,39 @@ void P20F04D::clearScreen() {
 
 void P20F04D::setScreen(int new_screen[3][8]) {
     digitalWrite(latchpin, 0);
-    setScreenNoLatch(new_screen);
+    setScreenNL(new_screen);
     digitalWrite(latchpin, 1);
 }
 
-void P20F04D::setScreenNoLatch(int new_screen[3][8]) {
+void P20F04D::setScreenNL(int new_screen[3][8]) {
     for (uint8_t c=0; c<3; c++) {
         for (uint8_t i=0; i<8; i++) {
             screen[c][i] = new_screen[c][i];
         }
-        //P20F04D::recalc(c);
     }
-    P20F04D::redrawNoLatch();
+    P20F04D::redrawNL();
 }
 
-void P20F04D::appendCol(uint8_t col[3]) {
+void P20F04D::appendColNR(uint8_t col[3]) { // append column no redraw
     for (uint8_t c=0; c<3; c++) {
         for (uint8_t r=0; r<8; r++) {
             screen[c][r] = screen[c][r] << 1;
             screen[c][r] = screen[c][r] | ((col[c] >> r) & 0x01);
         }
-        //P20F04D::recalc(c);
     }
+}
+
+void P20F04D::appendCol(uint8_t col[3]) { // append column
+    P20F04D::appendColNR(col);
     P20F04D::redraw();
 }
 
-/*void P20F04D::recalc(uint8_t c) {
-    
-}*/
-
 void P20F04D::redraw() {
     digitalWrite(latchpin, 0);
-    P20F04D::redrawNoLatch();
+    P20F04D::redrawNL();
     digitalWrite(latchpin, 1);
 }
-void P20F04D::redrawNoLatch() {
+void P20F04D::redrawNL() {
     int screen_internal[3][2][4];
     for (uint8_t c=0; c<3; c++) {
         for (uint8_t i=0; i<2; i++) {
